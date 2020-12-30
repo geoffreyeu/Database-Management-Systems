@@ -1,0 +1,87 @@
+SQL> Select*from cat;
+
+TABLE_NAME                     TABLE_TYPE                                       
+------------------------------ -----------                                      
+CUSTOMERS                      TABLE                                            
+RENTALS                        TABLE                                            
+VEHICLES                       TABLE                                            
+
+SQL> desc vehicles;
+ Name                                      Null?    Type
+ ----------------------------------------- -------- ----------------------------
+ ID                                        NOT NULL NUMBER(38)
+ VIN                                       NOT NULL NUMBER(38)
+ LIC_NO                                    NOT NULL CHAR(10)
+ MAKE                                               CHAR(3)
+ MODEL                                              CHAR(10)
+ YEAR                                               NUMBER(38)
+ COLOR                                              CHAR(8)
+ COST                                               NUMBER(6,2)
+
+SQL> desc customers;
+ Name                                      Null?    Type
+ ----------------------------------------- -------- ----------------------------
+ C_ID                                      NOT NULL NUMBER(38)
+ NAME                                      NOT NULL CHAR(10)
+ PHONE                                              CHAR(9)
+ EMAIL                                              CHAR(15)
+
+SQL> desc rentals;
+ Name                                      Null?    Type
+ ----------------------------------------- -------- ----------------------------
+ C_ID                                      NOT NULL NUMBER(38)
+ V_ID                                      NOT NULL NUMBER(38)
+ CK_OUT_DATE                               NOT NULL DATE
+ MILES_OUT                                          NUMBER(38)
+ RET_DATE                                           DATE
+ MILES_IN                                           NUMBER(38)
+
+SQL> column owner format a12
+SQL> ;
+  1* Select*from cat
+SQL> column table_name format a12;
+SQL> column foreign_key format a12;
+SQL> column primary_key format a12;
+SQL> column referring_table format a15;
+SQL> column search_condition format a45;
+SQL>       select a.owner, a.table_name, column_name primary_key,
+  2              a.constraint_name
+  3        from   user_cons_columns a, user_constraints b
+  4        where  a.constraint_name = b.constraint_name and
+  5               constraint_type = 'P';
+
+OWNER        TABLE_NAME   PRIMARY_KEY  CONSTRAINT_NAME                          
+------------ ------------ ------------ ------------------------------           
+DBCLASS97    CUSTOMERS    C_ID         SYS_C0026725                             
+DBCLASS97    VEHICLES     ID           SYS_C0026930                             
+DBCLASS97    RENTALS      C_ID         RENTALS_KEY                              
+DBCLASS97    RENTALS      V_ID         RENTALS_KEY                              
+
+SQL>       select a.owner, a.table_name, a.column_name foreign_key,
+  2               b.table_name Referring_table, b.column_name
+  3               Primary_key
+  4        from   user_cons_columns a, user_cons_columns b,
+  5               user_constraints c
+  6        where  a.constraint_name = c.constraint_name and
+  7               c.r_constraint_name = b.constraint_name;
+
+OWNER        TABLE_NAME   FOREIGN_KEY  REFERRING_TABLE PRIMARY_KEY              
+------------ ------------ ------------ --------------- ------------             
+DBCLASS97    RENTALS      C_ID         CUSTOMERS       C_ID                     
+DBCLASS97    RENTALS      V_ID         VEHICLES        ID                       
+
+SQL>         select owner, table_name, search_condition from
+  2          user_constraints where search_condition is not null;
+
+OWNER        TABLE_NAME   SEARCH_CONDITION                                      
+------------ ------------ ---------------------------------------------         
+DBCLASS97    RENTALS      "CK_OUT_DATE" IS NOT NULL                             
+DBCLASS97    VEHICLES     "VIN" IS NOT NULL                                     
+DBCLASS97    VEHICLES     year in(2015,2016,2017,2018,2019,2020)                
+DBCLASS97    VEHICLES     make in('f','d','h','t')                              
+DBCLASS97    VEHICLES     "LIC_NO" IS NOT NULL                                  
+DBCLASS97    CUSTOMERS    "NAME" IS NOT NULL                                    
+
+6 rows selected.
+
+SQL> spool off

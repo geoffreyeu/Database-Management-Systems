@@ -1,0 +1,106 @@
+SQL> get Eu.sql
+  1  ACCEPT user_c_id NUMBER PROMPT 'Enter Customer id: ';
+  2  ACCEPT user_v_id NUMBER PROMPT 'Enter Vehicle id: ';
+  3  ACCEPT user_miles_out NUMBER PROMPT 'Enter Mile out: ';
+  4  DECLARE
+  5  cust_check NUMBER;
+  6  vehid_check NUMBER;
+  7  vehicle_check NUMBER;
+  8  fail EXCEPTION;
+  9  BEGIN
+ 10  	SELECT COUNT(*) INTO cust_check FROM customers where c_id = &user_c_id;
+ 11  	SELECT COUNT(*) INTO vehid_check FROM vehicles where id = &user_v_id;
+ 12  	SELECT COUNT(*) INTO vehicle_check FROM vehicles where id = &user_v_id AND id NOT IN (SELECT v_id FROM rentals WHERE ret_date IS NULL);
+ 13  	IF (cust_check = 1) AND (vehicle_check = 1) THEN
+ 14  		INSERT INTO rentals values (&user_c_id, &user_v_id, to_date(sysdate), &user_miles_out, NULL, NULL);
+ 15  		COMMIT;
+ 16  		dbms_output.put_line('Record was succesfully entered into the database!');
+ 17  	ELSE
+ 18  		RAISE fail;
+ 19  	END IF;
+ 20  EXCEPTION
+ 21  	WHEN fail THEN
+ 22  		Rollback;
+ 23  		IF (vehid_check = 0) THEN
+ 24  			dbms_output.put_line('This Vehicle does not exist!');
+ 25  			END IF;
+ 26  		IF (vehicle_check = 0) THEN
+ 27  			dbms_output.put_line('This Vehicle is not currently avalible!');
+ 28  			END IF;
+ 29  		IF (cust_check = 0) THEN
+ 30  			dbms_output.put_line('This Customer does not exist!');
+ 31  			END IF;
+ 32* END;
+SQL> select * from rentals;
+
+      C_ID       V_ID CK_OUT_DA  MILES_OUT RET_DATE    MILES_IN                 
+---------- ---------- --------- ---------- --------- ----------                 
+         1          1 01-JAN-20     125874 02-JAN-20        128                 
+         2          2 02-JAN-20      36529 03-JAN-20        369                 
+         3          3 03-JAN-20      45932 04-JAN-20      12546                 
+         4          4 04-JAN-20      79634 05-JAN-20        238                 
+         5          5 05-JAN-20      12546 06-JAN-20      12549                 
+         6          6 06-JAN-20      95635 07-JAN-20      36987                 
+         7          7 07-JAN-20      79852 08-JAN-20      21478                 
+         8          8 08-JAN-20      16394         		    128                 
+         9          9 09-JAN-20      23584 10-JAN-20      96582                 
+        10         10 10-JAN-20     236894 11-JAN-20      12469                 
+
+10 rows selected.
+
+SQL> @Eu.sql
+Enter Customer id: 20
+Enter Vehicle id: 8
+Enter Mile out: 2000
+This Customer does not exist!
+This Vehicle is not currently avalible!                                                                                                           
+
+PL/SQL procedure successfully completed.
+
+SQL> @Eu.sql
+Enter Customer id: 8
+Enter Vehicle id: 8
+Enter Mile out: 2000                                                        
+This Vehicle is not currently avalible!                                                  
+
+PL/SQL procedure successfully completed.
+
+SQL> @Eu.sql
+Enter Customer id: 1
+Enter Vehicle id: 20
+Enter Mile out: 2000
+This Vehicle does not exist!                                                          
+
+PL/SQL procedure successfully completed.
+
+SQL> @Eu.sql
+Enter Customer id: 1
+Enter Vehicle id: 1
+Enter Mile out: 2000
+Record was succesfully entered into the database!                                     
+
+PL/SQL procedure successfully completed.
+
+SQL> select * from rentals;
+
+      C_ID       V_ID CK_OUT_DA  MILES_OUT RET_DATE    MILES_IN                 
+---------- ---------- --------- ---------- --------- ----------
+         1        	1 08-DEC-20       2000
+         1          1 01-JAN-20     125874 02-JAN-20        128                 
+         2          2 02-JAN-20      36529 03-JAN-20        369                 
+         3          3 03-JAN-20      45932 04-JAN-20      12546                 
+         4          4 04-JAN-20      79634 05-JAN-20        238                 
+         5          5 05-JAN-20      12546 06-JAN-20      12549                 
+         6          6 06-JAN-20      95635 07-JAN-20      36987                 
+         7          7 07-JAN-20      79852 08-JAN-20      21478                 
+         8          8 08-JAN-20      16394         		    128                 
+         9          9 09-JAN-20      23584 10-JAN-20      96582                 
+
+
+      C_ID       V_ID CK_OUT_DA  MILES_OUT RET_DATE    MILES_IN                 
+---------- ---------- --------- ---------- --------- ----------		
+        10         10 10-JAN-20     236894 11-JAN-20      12469		
+
+11 rows selected.
+
+SQL> spool off

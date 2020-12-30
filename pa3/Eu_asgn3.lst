@@ -1,0 +1,73 @@
+SQL> select make, count(make), min(cost), max(cost) from vehicles group by make;
+
+MAK COUNT(MAKE)  MIN(COST)  MAX(COST)                                           
+--- ----------- ---------- ----------                                           
+h             2         10       1000                                           
+t             2         10       2000                                           
+f             3         10       3000                                           
+d             3         10        100                                           
+
+SQL> select name, make, model, ck_out_date, ret_date
+  2  from rentals, customers, vehicles
+  3  where rentals.c_id=customers.c_id and v_id=id order by name;
+
+NAME       MAK MODEL      CK_OUT_DA RET_DATE                                    
+---------- --- ---------- --------- ---------                                   
+Bob1       f   Mustang    01-JAN-20 02-JAN-20                                   
+Bob2       d   Challenger 02-JAN-20 03-JAN-20                                   
+K          h   Accord     03-JAN-20 04-JAN-20                                   
+L          t   Camry      04-JAN-20 05-JAN-20                                   
+M          f   Mustang    05-JAN-20 06-JAN-20                                   
+N          d   Challenger 06-JAN-20 07-JAN-21                                   
+O          h   Accord     07-JAN-20 08-JAN-21                                   
+P          t   Camry      08-JAN-20 09-JAN-21                                   
+Q          f   Mustang    09-JAN-20 10-JAN-21                                   
+R          d   Challenger 10-JAN-20 11-JAN-21                                   
+
+10 rows selected.
+
+SQL> select lic_no, model, ck_out_date, miles_out
+  2  from vehicles inner join rentals ON ID = V_ID
+  3  where vehicles.make = 'h' AND ret_date is not null
+  4  order by ck_out_date desc;
+
+LIC_NO     MODEL      CK_OUT_DA  MILES_OUT                                      
+---------- ---------- --------- ----------                                      
+qazxsw7    Accord     07-JAN-20          1                                      
+qazxsw3    Accord     03-JAN-20          1                                      
+
+SQL> select lic_no, r.rent_times
+  2  from vehicles v left join
+  3  (select v_id, count(v_id) as rent_times
+  4  from rentals group by v_id order by v_id)
+  5  r on v.id=r.v_id order by v.lic_no;
+
+LIC_NO     RENT_TIMES                                                           
+---------- ----------                                                           
+qazxsw1             1                                                           
+qazxsw10            1                                                           
+qazxsw2             1                                                           
+qazxsw3             1                                                           
+qazxsw4             1                                                           
+qazxsw5             1                                                           
+qazxsw6             1                                                           
+qazxsw7             1                                                           
+qazxsw8             1                                                           
+qazxsw9             1                                                           
+
+10 rows selected.
+
+SQL> SELECT c.name
+  2  from customers c, rentals r, vehicles v
+  3  where c.c_id = r.c_id AND r.v_id = v.id
+  4  AND v.cost in (SELECT max(cost) FROM vehicles v)
+  5  AND r.c_id NOT in (SELECT r.c_id
+  6  from customers c, rentals r, vehicles v
+  7  where c.c_id = r.c_id AND r.v_id = v.id
+  8  AND v.cost NOT in (SELECT max(cost) from vehicles));
+
+NAME                                                                            
+----------                                                                      
+M                                                                               
+
+SQL> spool off

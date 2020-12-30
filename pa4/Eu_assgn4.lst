@@ -1,0 +1,49 @@
+SQL> SELECT To_Char(ck_out_date, 'Month') AS "Month", COUNT(c_id) AS "Orders" FROM rentals WHERE To_Char(ck_out_date, 'YYYY') = '2020' GROUP BY To_Char(ck_out_date, 'Month');
+
+Month                                    Orders                                 
+------------------------------------ ----------                                 
+January                                      10                                 
+
+SQL> SELECT c.name FROM RENTALS r LEFT JOIN CUSTOMERS c on r.c_id = c.c_id WHERE TO_CHAR(r.ck_out_date, 'DY') = 'FRI';
+
+NAME                                                                            
+----------                                                                      
+K                                                                               
+R                                                                               
+
+SQL> SELECT CONCAT(name, '** To be Contacted') AS Names FROM customers WHERE c_id IN (SELECT c_id FROM rentals WHERE ret_date IS NULL AND ck_out_date BETWEEN To_date(sysdate, 'dd-MON-yy') AND To_date(sysdate-10, 'dd-MON-yy'));
+
+no rows selected
+
+SQL> SELECT lic_no, DECODE(make,'F ','Ford','D ','Dodge','H ','Honda','T ','Toyota') AS make, model FROM vehicles JOIN rentals ON vehicles.id=rentals.v_id WHERE TO_CHAR(ck_out_date, 'Mon') = 'Oct' AND TO_CHAR(ret_date, 'Mon') = 'Nov' AND TO_CHAR(ck_out_date, 'YYYY') = '2020';
+
+no rows selected
+
+SQL> Select text from user_views where view_name = 'OCT_RENT';
+
+TEXT                                                                            
+--------------------------------------------------------------------------------
+SELECT lic_no, NVL(DECODE(COUNT(ck_out_date),'0','None'),COUNT(ck_out_date)) AS 
+rent_total FROM vehicles LEFT JOIN (SELECT v_id, ck_out_date FROM rentals WHERE 
+TO_CHAR(ck_out_date, 'Month') = 'October  ') ON vehicles.id = v_id GROUP BY vehicles.lic_no                                                                     
+                                                                                
+
+SQL> select * from OCT_RENT
+  2  ;
+
+LIC_NO     RENT_TOTAL                                                           
+---------- ----------------------------------------                             
+qazxsw5    None                                                                 
+qazxsw7    None                                                                 
+qazxsw4    None                                                                 
+qazxsw3    None                                                                 
+qazxsw10   None                                                                 
+qazxsw9    None                                                                 
+qazxsw8    None                                                                 
+qazxsw1    None                                                                 
+qazxsw6    None                                                                 
+qazxsw2    None                                                                 
+
+10 rows selected.
+
+SQL> spool off
